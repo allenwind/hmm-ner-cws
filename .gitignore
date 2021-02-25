@@ -1,7 +1,5 @@
 # self
-Makefile
-run.sh
-test.py
+dataset/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
