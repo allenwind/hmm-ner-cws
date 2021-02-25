@@ -1,3 +1,5 @@
+# 序列标注中常用标签的转换
+
 def bio2iobes(tags):
     # BIO标签转IOBES标签
     def split_spans(tags):
@@ -52,6 +54,7 @@ def find_entities(text, tags, withO=False):
     # withO是否返回O标签内容
     def segment_by_tags(text, tags):
         buf = ""
+        plabel = None
         for tag, char in zip(tags, text):
             if tag == "O":
                 label = tag
@@ -73,4 +76,21 @@ def find_entities(text, tags, withO=False):
                 plabel = label
         if buf:
             yield buf, plabel
+    return list(segment_by_tags(text, tags))
+
+def find_words(text, tags):
+    # 通过SBME序列对text分词
+    def segment_by_tags(text, tags):
+        buf = ""
+        for tag, char in zip(tags, text):
+            # t is S or B
+            if tag in ["S", "B"]:
+                if buf:
+                    yield buf
+                buf = char
+            # t is M or E
+            else:
+                buf += char
+        if buf:
+            yield buf
     return list(segment_by_tags(text, tags))

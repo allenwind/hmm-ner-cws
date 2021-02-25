@@ -1,5 +1,10 @@
 # self
-dataset/
+old.py
+dataset/pos
+dataset/ner
+dataset/cws
+dataset/china-people-daily-ner-corpus
+dataset/dh_msra.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
