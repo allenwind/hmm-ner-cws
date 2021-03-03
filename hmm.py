@@ -9,7 +9,7 @@ class HiddenMarkovChain:
 	
     def __init__(self, tags, task="NER"):
         # 标签集
-        self.tags = set(tags)
+        self.tags = sorted(set(tags))
         self.tags2id = {i:j for j,i in enumerate(self.tags)}
         self.id2tags = {j:i for i,j in self.tags2id.items()}
         self.state_size = len(tags)
@@ -81,3 +81,26 @@ class HiddenMarkovChain:
             viterbi_score = np.max(dp[-1])
             return viterbi, viterbi_score
         return viterbi
+
+    def plot_trans(self):
+        try:
+            import seaborn as sns
+            import matplotlib.pyplot as plt
+        except ImportError as err:
+            print(err)
+            return
+        ax = sns.heatmap(
+            self.A,
+            vmin=0.0,
+            vmax=1.0,
+            fmt=".2f",
+            cmap="copper",
+            annot=True,
+            cbar=True,
+            xticklabels=self.tags,
+            yticklabels=self.tags,
+            linewidths=0.25,
+            cbar_kws={"orientation": "horizontal"}
+        )
+        ax.set_title("Transition Matrix")
+        plt.show()

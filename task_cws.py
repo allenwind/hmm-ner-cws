@@ -56,6 +56,7 @@ X, y, labels = dataset.load_cws_ctb6("train", with_labels=True)
 
 model = HiddenMarkovChain(labels, task="CWS")
 model.fit(X, y)
+model.plot_trans()
 
 tokenizer = HMMTokenizer(labels, task="CWS")
 tokenizer.fit(X, y)

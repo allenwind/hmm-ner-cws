@@ -6,6 +6,7 @@ X, y, labels = dataset.load_china_people_daily("train", with_labels=True)
 
 model = HiddenMarkovChain(labels, task="NER")
 model.fit(X, y)
+model.plot_trans()
 
 X, y = dataset.load_china_people_daily("test")
 for sentence, labels in zip(X, y):
