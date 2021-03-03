@@ -1,5 +1,15 @@
 # hmm-ner-cws
 
+
+
+## Markov Chain
+
+HMM建立在MarkovChain上，下图是MarkovChain的参数可视化：
+
+![](asset/mc-params.png)
+
+## HMM
+
 经典的HMM模型用于NER和CWS任务。
 
 使用HMM进行中文分词，
