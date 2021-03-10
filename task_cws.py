@@ -60,16 +60,16 @@ model.plot_trans()
 
 tokenizer = HMMTokenizer(labels, task="CWS")
 tokenizer.fit(X, y)
+if __name__ == "__main__":
+    for text in dataset.load_sentences():
+        # 两种方案对比
+        print(model.find(text))
+        print(tokenizer.cut(text))
 
-for text in dataset.load_sentences():
-    # 两种方案对比
-    print(model.find(text))
-    print(tokenizer.cut(text))
-
-X, y = dataset.load_cws_ctb6("test")
-for sentence, labels in zip(X, y):
-    # 对比
-    print(find_words(sentence, labels))
-    print(model.find(sentence))
-    print(tokenizer.cut(sentence))
-    input()
+    X, y = dataset.load_cws_ctb6("test")
+    for sentence, labels in zip(X, y):
+        # 对比
+        print(find_words(sentence, labels))
+        print(model.find(sentence))
+        print(tokenizer.cut(sentence))
+        input()

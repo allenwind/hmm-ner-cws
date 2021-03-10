@@ -45,6 +45,7 @@ class HiddenMarkovChain:
         self.built = True
 
     def predict(self, X):
+        # 给定一个batch的观察序列X，预测各个样本每个时间步隐状态的分值scores
         batch_scores = []
         for sentence in X:
             scores = np.zeros((len(sentence), self.state_size))
@@ -55,6 +56,7 @@ class HiddenMarkovChain:
         return batch_scores
 
     def find(self, sentence):
+        # 用viterbi求scores最优路径
         scores = self.predict([sentence])[0]
         log_trans = np.log(np.where(self.A==0, 0.0001, self.A))
         viterbi = self.viterbi_decode(scores, log_trans)
@@ -97,10 +99,12 @@ class HiddenMarkovChain:
             cmap="copper",
             annot=True,
             cbar=True,
-            xticklabels=self.tags,
-            yticklabels=self.tags,
+            # xticklabels=self.tags,
+            # yticklabels=self.tags,
             linewidths=0.25,
             cbar_kws={"orientation": "horizontal"}
         )
         ax.set_title("Transition Matrix")
+        ax.set_xticklabels(self.tags, rotation=0)
+        ax.set_yticklabels(self.tags, rotation=0)
         plt.show()
