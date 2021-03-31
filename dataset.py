@@ -1,8 +1,21 @@
 import random
 import itertools
 import re
+import time
+from functools import wraps
+import numpy as np
 
 # NER数据加载
+
+def timethis(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        print(func.__name__, "elapsed time {:.3f}s".format(end-start))
+        return result
+    return wrapper
 
 def load_file(file, sep=" ", shuffle=True, with_labels=False):
     # 返回逐位置标注形式
@@ -74,6 +87,18 @@ def load_cws_ctb6(file, shuffle=True, with_labels=False):
         return X, y, labels
     return X, y
 
+@timethis
+def load_random_sentences(file=None, nums=50000, with_labels=False):
+    X = []
+    y = []
+    for text, tags in gen_random_sentences(nums):
+        X.append(text)
+        y.append(tags)
+    if with_labels:
+        labels = sorted("BMES")
+        return X, y, labels
+    return X, y
+
 def load_sentences():
     # 测试分词效果的句子
     texts = []
@@ -91,6 +116,34 @@ def load_sentences():
     texts.append("除了导致大批旅客包括许多准备前往台北采访空难的新闻记者滞留在香港机场，直到下午2:17分日本亚细亚航空公司开出第一班离港到台北的班机才疏导了滞留在机场的旅客。")
     return texts
 
+def compute_sbme_tags(sentence):
+    tags = []
+    for word in sentence:
+        if len(word) == 1:
+            tags.append("S")
+        else:
+            tags.extend(["B"] + ["M"]*(len(word)-2) + ["E"])
+    return np.array(tags)
+
+def gen_random_sentences(nums, maxsize=100):
+    try:
+        import jieba
+    except ImportError as err:
+        print(err)
+        return ""
+
+    jieba.initialize()
+    words = {w:v for w,v in jieba.dt.FREQ.items() if v != 0}
+    ws = list(words.keys())
+    p = np.array(list(words.values()))
+    p = p / np.sum(p)
+    for _ in range(nums):
+        size = random.randint(10, maxsize)
+        sentence = np.random.choice(ws, size, p=p)
+        tags = compute_sbme_tags(sentence)
+        yield "".join(sentence), tags
+
+
 if __name__ == "__main__":
     X, y, labels = load_msra("train", with_labels=True)
     print(len(X), len(y))
@@ -99,3 +152,9 @@ if __name__ == "__main__":
     X, y, labels = load_china_people_daily("train", with_labels=True)
     print(len(X), len(y))
     print(labels)
+
+    for text, tags in gen_random_sentences(5):
+        print(text)
+        print(tags)
+
+    load_random_sentences(nums=100)

@@ -21,6 +21,8 @@ class HiddenMarkovChain:
         self.reset()
 
     def reset(self):
+        # 初始状态的参数学习
+        self.pi = np.zeros((1, self.state_size))
         # 状态转移矩阵
         self.A = np.zeros((self.state_size, self.state_size))
         # 观察矩阵，稀疏形式
@@ -55,6 +57,13 @@ class HiddenMarkovChain:
             batch_scores.append(scores)
         return batch_scores
 
+    def sampling(self, steps):
+        init = self.pi
+        rs = np.zeros((steps+1, self.state_size))
+
+    def _sampling_from_multi_category(self, p):
+        return np.random.multinomial(1, p)
+
     def find(self, sentence):
         # 用viterbi求scores最优路径
         scores = self.predict([sentence])[0]
@@ -71,10 +80,13 @@ class HiddenMarkovChain:
         backpointers = np.zeros_like(scores, dtype=np.int32)
         dp[0] = scores[0]
         for t in range(1, scores.shape[0]):
+            # 扩展维度便于广播，计算上一时间步到当前时间步所有路径分值
             v = np.expand_dims(dp[t-1], axis=1) + trans
+            # 保存当前时间步各状态的最优路径
             dp[t] = scores[t] + np.max(v, axis=0)
             backpointers[t] = np.argmax(v, axis=0)
 
+        # 回溯状态
         viterbi = [np.argmax(dp[-1])]
         for bp in reversed(backpointers[1:]):
             viterbi.append(bp[viterbi[-1]])

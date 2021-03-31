@@ -52,7 +52,7 @@ class HMMTokenizer(TokenizerBase, HiddenMarkovChain):
     def find_word(self, sentence):
         yield from self.find(sentence)
 
-X, y, labels = dataset.load_cws_ctb6("train", with_labels=True)
+X, y, labels = dataset.load_random_sentences("train", nums=1000, with_labels=True)
 
 model = HiddenMarkovChain(labels, task="CWS")
 model.fit(X, y)
