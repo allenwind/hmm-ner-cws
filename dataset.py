@@ -88,7 +88,7 @@ def load_cws_ctb6(file, shuffle=True, with_labels=False):
     return X, y
 
 @timethis
-def load_random_sentences(file=None, nums=50000, with_labels=False):
+def load_random_sentences(file=None, nums=5000, with_labels=False):
     X = []
     y = []
     for text, tags in gen_random_sentences(nums):

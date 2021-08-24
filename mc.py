@@ -41,7 +41,6 @@ class MarkovChain:
     def sampling(self, steps):
         init = self.pi
         rs = np.zeros((steps+1, self.size))
-        
 
     def plot_trans(self):
         try:

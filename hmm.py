@@ -4,6 +4,9 @@ import math
 import numpy as np
 from collections import *
 from snippets import find_entities, find_words
+from snippets import find_entities_chunking, find_words_regions
+
+converts = [find_entities, find_entities_chunking, find_words, find_words_regions]
 
 class HiddenMarkovChain:
 	
@@ -14,10 +17,7 @@ class HiddenMarkovChain:
         self.id2tags = {j:i for i,j in self.tags2id.items()}
         self.state_size = len(tags)
         assert task in ("NER", "CWS")
-        if task == "NER":
-            self.convert = find_entities
-        else:
-            self.convert = find_words
+        self.task = task
         self.reset()
 
     def reset(self):
@@ -64,13 +64,22 @@ class HiddenMarkovChain:
     def _sampling_from_multi_category(self, p):
         return np.random.multinomial(1, p)
 
-    def find(self, sentence):
+    def find(self, sentence, with_loc=False):
         # 用viterbi求scores最优路径
         scores = self.predict([sentence])[0]
         log_trans = np.log(np.where(self.A==0, 0.0001, self.A))
         viterbi = self.viterbi_decode(scores, log_trans)
         viterbi = [self.id2tags[i] for i in viterbi]
-        return self.convert(sentence, viterbi)
+        if self.task == "NER":
+            if with_loc:
+                return find_entities_chunking(viterbi)
+            else:
+                return find_entities(sentence, viterbi)
+        else:
+            if with_loc:
+                return find_words_regions(sentence, viterbi)
+            else:
+                return find_words(sentence, viterbi)
 
     def viterbi_decode(self, scores, trans, return_score=False):
         # 使用viterbi算法求最优路径

@@ -52,6 +52,7 @@ class HMMTokenizer(TokenizerBase, HiddenMarkovChain):
     def find_word(self, sentence):
         yield from self.find(sentence)
 
+# 使用无监督的随机数据
 X, y, labels = dataset.load_random_sentences("train", nums=1000, with_labels=True)
 
 model = HiddenMarkovChain(labels, task="CWS")
@@ -61,15 +62,25 @@ model.plot_trans()
 tokenizer = HMMTokenizer(labels, task="CWS")
 tokenizer.fit(X, y)
 if __name__ == "__main__":
+    from metrics import evaluate_prf
+    from snippets import find_words_regions
+    from snippets import to_regions
+
     for text in dataset.load_sentences():
         # 两种方案对比
         print(model.find(text))
         print(tokenizer.cut(text))
 
     X, y = dataset.load_cws_ctb6("test")
-    for sentence, labels in zip(X, y):
+    n = 8
+    for sentence, labels in zip(X[:8], y[:8]):
         # 对比
         print(find_words(sentence, labels))
         print(model.find(sentence))
         print(tokenizer.cut(sentence))
-        input()
+
+    texts, labels = dataset.load_cws_ctb6("test")
+    y_true = [find_words_regions(text, tags) for text, tags in zip(texts, labels)]
+    y_pred = [to_regions(segments) for segments in [tokenizer.cut(text) for text in texts]]
+    template = "precision:{:.5f}, recall:{:.5f}, f1:{:.5f}"
+    print(template.format(*evaluate_prf(y_true, y_pred)))
