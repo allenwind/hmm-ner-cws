@@ -79,8 +79,12 @@ if __name__ == "__main__":
         print(model.find(sentence))
         print(tokenizer.cut(sentence))
 
+    # 评估指标
+    X, y, labels = dataset.load_cws_ctb6("train", with_labels=True)
+    model = HiddenMarkovChain(labels, task="CWS")
+    model.fit(X, y)
     texts, labels = dataset.load_cws_ctb6("test")
     y_true = [find_words_regions(text, tags) for text, tags in zip(texts, labels)]
-    y_pred = [to_regions(segments) for segments in [tokenizer.cut(text) for text in texts]]
+    y_pred = [to_regions(segments) for segments in [model.find(text) for text in texts]]
     template = "precision:{:.5f}, recall:{:.5f}, f1:{:.5f}"
     print(template.format(*evaluate_prf(y_true, y_pred)))

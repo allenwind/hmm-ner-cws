@@ -39,6 +39,7 @@ class HiddenMarkovChain:
                 id2 = self.tags2id[label2]
                 self.A[id1][id2] += 1
         self.A = self.A / np.sum(self.A, axis=1, keepdims=True)
+        self.A[self.A == 0] = 1e-10
         # 观察矩阵参数学习
         for sentence, labels in zip(X, y):
             for char, label in zip(sentence, labels):
@@ -53,7 +54,11 @@ class HiddenMarkovChain:
             scores = np.zeros((len(sentence), self.state_size))
             for i, char in enumerate(sentence):
                 for j, k in self.B.items():
-                    scores[i][self.tags2id[j]] = math.log(k[char]+1) - self.logtotal[j]
+                    if char not in k:
+                        # for OOV问题
+                        scores[i][self.tags2id[j]] = -self.logtotal[j]
+                    else:
+                        scores[i][self.tags2id[j]] = math.log(k[char]) - self.logtotal[j]
             batch_scores.append(scores)
         return batch_scores
 
@@ -67,7 +72,8 @@ class HiddenMarkovChain:
     def find(self, sentence, with_loc=False):
         # 用viterbi求scores最优路径
         scores = self.predict([sentence])[0]
-        log_trans = np.log(np.where(self.A==0, 0.0001, self.A))
+        # log_trans = np.log(np.where(self.A==0, 0.0001, self.A))
+        log_trans = np.log(self.A)
         viterbi = self.viterbi_decode(scores, log_trans)
         viterbi = [self.id2tags[i] for i in viterbi]
         if self.task == "NER":
